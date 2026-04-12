@@ -1,0 +1,81 @@
+flowchart LR
+  %% Scaled production architecture.
+  subgraph ingress[Edge and Traffic Ingress]
+    caller([Caller]) --> provider[Twilio or SIP Provider]
+    provider --> waf[WAF + TLS]
+    waf --> gateway[API Gateway / Ingress]
+  end
+
+  subgraph cluster[AWS EKS Multi-AZ Cluster]
+    orchestrator[Voice Orchestrator Service\nCall state and routing]
+    policy[Policy Service\nTenant rules and compliance]
+    aiadapter[AI Adapter Service\nSTT/TTS/LLM abstraction]
+    handoff[Handoff Service\nTransfer to human agent]
+    queue[Queue\nSQS/Kafka/RabbitMQ]
+    workers[Async Workers\nNon-blocking tasks]
+    redis[(Redis\nEphemeral state and rate limit)]
+    rds[(PostgreSQL RDS\nTransactional state)]
+    s3[(S3\nRecordings and artifacts)]
+  end
+
+  subgraph observability[Observability and Reliability]
+    metrics[Prometheus Metrics]
+    dashboards[Grafana Dashboards]
+    tracing[Distributed Tracing]
+    logs[Centralized Logs]
+    alerts[Alerting\nPagerDuty/On-call]
+  end
+
+  subgraph security[Security and Governance]
+    secrets[AWS Secrets Manager]
+    iam[IAM Least Privilege]
+    audit[Audit Trail by Tenant]
+  end
+
+  subgraph delivery[Delivery Pipeline and IaC]
+    actions[GitHub Actions]
+    registry[ECR Docker Registry]
+    terraform[Terraform]
+  end
+
+  gateway --> orchestrator
+  orchestrator --> policy
+  orchestrator --> aiadapter
+  orchestrator --> handoff
+  orchestrator --> redis
+  orchestrator --> rds
+  orchestrator --> queue
+  queue --> workers
+  workers --> rds
+  workers --> s3
+
+  orchestrator --> metrics
+  orchestrator --> tracing
+  orchestrator --> logs
+  workers --> metrics
+  workers --> logs
+  metrics --> dashboards
+  metrics --> alerts
+
+  secrets --> orchestrator
+  secrets --> aiadapter
+  iam --> cluster
+  audit --> rds
+
+  actions --> registry
+  actions --> cluster
+  terraform --> cluster
+  terraform --> rds
+  terraform --> secrets
+
+  classDef edge fill:#EAF3FF,stroke:#2F6FED,stroke-width:1.5px,color:#0B1F44;
+  classDef core fill:#EFFFF4,stroke:#1B8A5A,stroke-width:1.5px,color:#0A3A25;
+  classDef data fill:#FFF6E8,stroke:#CC8A00,stroke-width:1.5px,color:#5C3B00;
+  classDef obs fill:#F4F1FF,stroke:#6A3FD1,stroke-width:1.5px,color:#2B1A63;
+  classDef sec fill:#FFEFF3,stroke:#C9356E,stroke-width:1.5px,color:#5A1230;
+
+  class caller,provider,waf,gateway edge;
+  class orchestrator,policy,aiadapter,handoff,queue,workers core;
+  class redis,rds,s3 data;
+  class metrics,dashboards,tracing,logs,alerts obs;
+  class secrets,iam,audit,actions,registry,terraform sec;

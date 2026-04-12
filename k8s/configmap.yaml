@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kleva-config
+  namespace: kleva
+data:
+  APP_NAME: "SeguraNova Voice Demo"
+  DEFAULT_LANGUAGE: "es-MX"
+  VOICE_NAME: "shimmer"
+  OPENAI_REALTIME_MODEL: "gpt-4o-realtime-preview"
+  OPENAI_EMBEDDING_MODEL: "text-embedding-3-small"
+  DATABASE_URL: "sqlite+aiosqlite:///./data/app.db"
+  CHROMA_DIR: "./data/chroma"
+  KB_COLLECTION: "insurance_kb"
+  ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:4173"
+  VAD_SILENCE_DURATION_MS: "350"
+  VAD_THRESHOLD: "0.72"
+  VAD_PREFIX_PADDING_MS: "140"
+  AUDIO_GATE_ENABLED: "false"
+  AUDIO_GATE_RMS_MIN: "180"

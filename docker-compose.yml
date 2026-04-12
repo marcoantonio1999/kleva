@@ -1,0 +1,45 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: kleva-backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: kleva-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+
+  ngrok:
+    image: ngrok/ngrok:alpine
+    container_name: kleva-ngrok
+    command: http backend:8000
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    depends_on:
+      - backend
+    ports:
+      - "4040:4040"
+    profiles:
+      - ngrok
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: kleva-cloudflared
+    command: tunnel --no-autoupdate --url http://host.docker.internal:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    profiles:
+      - tunnel

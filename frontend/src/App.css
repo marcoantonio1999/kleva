@@ -1,0 +1,311 @@
+:root {
+  --bg-1: #f4f6f5;
+  --bg-2: #e9efec;
+  --card: #ffffff;
+  --text: #15211d;
+  --muted: #5d6d67;
+  --line: #d7e2dd;
+  --accent: #005b4f;
+  --ok: #0f7a5f;
+  --down: #8b1f2a;
+}
+
+.layout {
+  min-height: 100vh;
+  padding: 20px;
+  background: radial-gradient(circle at 10% 0%, var(--bg-2), var(--bg-1) 40%, #f6f8f7 100%);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.header p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.status {
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.86rem;
+}
+
+.status.ok {
+  background: #dff5ea;
+  color: var(--ok);
+}
+
+.status.down {
+  background: #f9e2e4;
+  color: var(--down);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1.7fr 1.15fr;
+  gap: 16px;
+}
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.list,
+.feed {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.callRow {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fbfcfc;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+}
+
+.callRow.active {
+  border-color: var(--accent);
+  background: #f0faf7;
+}
+
+.badge {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #edf2ef;
+  color: #33463f;
+}
+
+.badge.in_progress {
+  background: #e6f3ff;
+  color: #194b7d;
+}
+
+.badge.completed {
+  background: #e0f5ea;
+  color: #0f6a52;
+}
+
+.line {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: #fff;
+}
+
+.line header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.line.caller {
+  border-left: 4px solid #1b5d52;
+}
+
+.line.assistant {
+  border-left: 4px solid #5f7f22;
+}
+
+.line.system {
+  border-left: 4px solid #7a4f14;
+}
+
+.line p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.line pre {
+  margin: 0;
+  font-size: 0.78rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #24312d;
+  background: #f5f8f7;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.mono {
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.78rem;
+}
+
+.cases {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.services {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 16px;
+}
+
+.serviceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.serviceCard {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: #fbfcfc;
+}
+
+.serviceCard header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.serviceCard p {
+  margin: 8px 0 4px;
+  font-size: 0.92rem;
+}
+
+.serviceCard small {
+  color: var(--muted);
+}
+
+.svcBadge {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.svcBadge.up {
+  background: #e0f5ea;
+  color: #0f6a52;
+}
+
+.svcBadge.warn {
+  background: #fff4df;
+  color: #8b5b14;
+}
+
+.svcBadge.down {
+  background: #f9e2e4;
+  color: #8b1f2a;
+}
+
+.svcBadge.idle {
+  background: #edf2ef;
+  color: #435650;
+}
+
+.serviceLogs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.serviceLogBlock {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fbfcfc;
+  padding: 10px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+.serviceLogBlock header {
+  margin-bottom: 8px;
+}
+
+.logList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: auto;
+}
+
+.logLine {
+  margin: 0;
+  font-size: 0.74rem;
+  color: #2e3c37;
+}
+
+.compact {
+  min-height: 120px;
+  justify-content: center;
+}
+
+.metric {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+@media (max-width: 1200px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .services {
+    grid-template-columns: 1fr;
+  }
+
+  .serviceGrid,
+  .serviceLogs {
+    grid-template-columns: 1fr;
+  }
+
+  .cases {
+    grid-template-columns: 1fr;
+  }
+}

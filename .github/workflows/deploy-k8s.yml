@@ -1,0 +1,69 @@
+name: Deploy to Kubernetes
+
+on:
+  workflow_dispatch:
+    inputs:
+      imageTag:
+        description: "Image tag to deploy (example: latest or sha-xxxx)"
+        required: true
+        default: "latest"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ github.event.inputs.imageTag }}
+      IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
+      TWILIO_PHONE_NUMBER_SID: ${{ secrets.TWILIO_PHONE_NUMBER_SID }}
+      PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_B64 }}" | base64 -d > ~/.kube/config
+
+      - name: Ensure namespace exists
+        run: kubectl apply -f k8s/namespace.yaml
+
+      - name: Sync app secrets
+        run: |
+          kubectl -n kleva create secret generic kleva-secrets \
+            --from-literal=OPENAI_API_KEY="${OPENAI_API_KEY}" \
+            --from-literal=TWILIO_ACCOUNT_SID="${TWILIO_ACCOUNT_SID}" \
+            --from-literal=TWILIO_AUTH_TOKEN="${TWILIO_AUTH_TOKEN}" \
+            --from-literal=TWILIO_PHONE_NUMBER="${TWILIO_PHONE_NUMBER}" \
+            --from-literal=TWILIO_PHONE_NUMBER_SID="${TWILIO_PHONE_NUMBER_SID}" \
+            --from-literal=PUBLIC_BASE_URL="${PUBLIC_BASE_URL}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply base manifests
+        run: kubectl apply -k k8s/
+
+      - name: Set backend image
+        run: |
+          kubectl -n kleva set image deployment/kleva-backend \
+            backend=${IMAGE_REGISTRY}/kleva-backend:${IMAGE_TAG}
+
+      - name: Set frontend image
+        run: |
+          kubectl -n kleva set image deployment/kleva-frontend \
+            frontend=${IMAGE_REGISTRY}/kleva-frontend:${IMAGE_TAG}
+
+      - name: Wait for rollout
+        run: |
+          kubectl -n kleva rollout status deployment/kleva-backend --timeout=120s
+          kubectl -n kleva rollout status deployment/kleva-frontend --timeout=120s

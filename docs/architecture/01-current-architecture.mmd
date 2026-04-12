@@ -1,0 +1,29 @@
+flowchart LR
+  %% Production baseline architecture.
+  caller([Caller]) --> twilio[Twilio Voice]
+  twilio -->|Voice webhook| api[Backend API\nFastAPI/Django]
+
+  api --> ai[AI Inference Service\nLLM Provider]
+  api --> vision[Vision and OCR Service\nYOLO/OCR/Liveness]
+  api --> db[(MySQL/PostgreSQL)]
+  api --> cache[(Redis\nSession/Cache)]
+
+  api --> workers[Async Workers\nCron/Background Jobs]
+  workers --> external[External Business APIs]
+
+  api --> handoff[Human Handoff\nContact Center]
+  api --> logs[Application Logs]
+
+  ai --> api
+  vision --> api
+  external --> workers
+
+  classDef edge fill:#EAF3FF,stroke:#2F6FED,stroke-width:1.5px,color:#0B1F44;
+  classDef app fill:#EFFFF4,stroke:#1B8A5A,stroke-width:1.5px,color:#0A3A25;
+  classDef data fill:#FFF6E8,stroke:#CC8A00,stroke-width:1.5px,color:#5C3B00;
+  classDef ops fill:#F4F1FF,stroke:#6A3FD1,stroke-width:1.5px,color:#2B1A63;
+
+  class caller,twilio edge;
+  class api,ai,vision,handoff app;
+  class db,cache data;
+  class workers,external,logs ops;

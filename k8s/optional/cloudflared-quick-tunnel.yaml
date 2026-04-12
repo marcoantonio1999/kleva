@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kleva-cloudflared
+  namespace: kleva
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kleva-cloudflared
+  template:
+    metadata:
+      labels:
+        app: kleva-cloudflared
+    spec:
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:latest
+          args:
+            - tunnel
+            - --no-autoupdate
+            - --url
+            - http://kleva-backend.kleva.svc.cluster.local:8000
