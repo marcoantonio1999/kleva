@@ -161,6 +161,12 @@ Kubernetes manifests are under `k8s/`:
 
 See detailed setup in `docs/CI-CD-K8S.md`.
 
+Helper script to configure Kubernetes GitHub secret automatically:
+
+```bash
+powershell -ExecutionPolicy Bypass -File .\\scripts\\github\\bootstrap-k8s-secret.ps1
+```
+
 ## Demo tools implemented
 
 - `get_basic_insurance_info`

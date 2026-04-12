@@ -65,6 +65,12 @@ Additional required GitHub Secrets for app runtime:
 - `TWILIO_PHONE_NUMBER_SID`
 - `PUBLIC_BASE_URL`
 
+Automatic setup for `KUBE_CONFIG_B64` once a cluster is configured locally:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\github\bootstrap-k8s-secret.ps1
+```
+
 ## 4) Kubernetes manifests
 
 Folder: `k8s/`
