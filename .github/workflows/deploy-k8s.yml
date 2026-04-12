@@ -7,13 +7,17 @@ on:
         description: "Image tag to deploy (example: latest or sha-xxxx)"
         required: true
         default: "latest"
+      runnerLabel:
+        description: "Runner label: ubuntu-latest (cloud) or self-hosted (local cluster)"
+        required: true
+        default: "ubuntu-latest"
 
 permissions:
   contents: read
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.inputs.runnerLabel }}
     env:
       IMAGE_TAG: ${{ github.event.inputs.imageTag }}
       IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}

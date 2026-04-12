@@ -113,7 +113,10 @@ GitHub Actions deploy path:
 
 1. Configure required GitHub Secrets.
 2. Run `Deploy to Kubernetes` workflow with `imageTag`.
-3. Workflow creates/updates `kleva-secrets` automatically and deploys images.
+3. Choose `runnerLabel`:
+  - `ubuntu-latest` for a cloud-reachable cluster.
+  - `self-hosted` if your cluster is local (for example `kind` on your machine).
+4. Workflow creates/updates `kleva-secrets` automatically and deploys images.
 
 Set image owner once:
 
