@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/REPLACE_OWNER/kleva-frontend:latest
+          image: ghcr.io/marcoantonio1999/kleva-frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
