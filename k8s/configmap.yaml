@@ -4,7 +4,7 @@ metadata:
   name: kleva-config
   namespace: kleva
 data:
-  APP_NAME: "SeguraNova Voice Demo"
+  APP_NAME: "SeguraNova"
   DEFAULT_LANGUAGE: "es-MX"
   VOICE_NAME: "shimmer"
   OPENAI_REALTIME_MODEL: "gpt-4o-realtime-preview"

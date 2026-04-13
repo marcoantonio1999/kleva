@@ -26,6 +26,12 @@ jobs:
       TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
       TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
       TWILIO_PHONE_NUMBER_SID: ${{ secrets.TWILIO_PHONE_NUMBER_SID }}
+      PRIMARY_INSURER_PHONE_NUMBER: ${{ secrets.PRIMARY_INSURER_PHONE_NUMBER }}
+      SECONDARY_INSURER_ID: ${{ secrets.SECONDARY_INSURER_ID }}
+      SECONDARY_INSURER_NAME: ${{ secrets.SECONDARY_INSURER_NAME }}
+      SECONDARY_INSURER_PHONE_NUMBER: ${{ secrets.SECONDARY_INSURER_PHONE_NUMBER }}
+      SECONDARY_TWILIO_ACCOUNT_SID: ${{ secrets.SECONDARY_TWILIO_ACCOUNT_SID }}
+      SECONDARY_TWILIO_AUTH_TOKEN: ${{ secrets.SECONDARY_TWILIO_AUTH_TOKEN }}
       PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
 
     steps:
@@ -55,6 +61,12 @@ jobs:
             --from-literal=TWILIO_AUTH_TOKEN="$env:TWILIO_AUTH_TOKEN" `
             --from-literal=TWILIO_PHONE_NUMBER="$env:TWILIO_PHONE_NUMBER" `
             --from-literal=TWILIO_PHONE_NUMBER_SID="$env:TWILIO_PHONE_NUMBER_SID" `
+            --from-literal=PRIMARY_INSURER_PHONE_NUMBER="$env:PRIMARY_INSURER_PHONE_NUMBER" `
+            --from-literal=SECONDARY_INSURER_ID="$env:SECONDARY_INSURER_ID" `
+            --from-literal=SECONDARY_INSURER_NAME="$env:SECONDARY_INSURER_NAME" `
+            --from-literal=SECONDARY_INSURER_PHONE_NUMBER="$env:SECONDARY_INSURER_PHONE_NUMBER" `
+            --from-literal=SECONDARY_TWILIO_ACCOUNT_SID="$env:SECONDARY_TWILIO_ACCOUNT_SID" `
+            --from-literal=SECONDARY_TWILIO_AUTH_TOKEN="$env:SECONDARY_TWILIO_AUTH_TOKEN" `
             --from-literal=PUBLIC_BASE_URL="$env:PUBLIC_BASE_URL" `
             --dry-run=client -o yaml | kubectl apply -f -
 
