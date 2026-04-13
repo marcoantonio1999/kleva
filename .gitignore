@@ -13,6 +13,11 @@ venv/
 backend/.env
 frontend/.env
 
+# Runtime data
+backend/data/app.db
+backend/data/chroma/
+backend/data/chroma_test/
+
 # Logs and temp
 *.log
 logs/

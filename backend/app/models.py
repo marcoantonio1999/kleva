@@ -16,6 +16,8 @@ class CallSession(Base):
     stream_sid: Mapped[str | None] = mapped_column(String(64), nullable=True)
     from_number: Mapped[str | None] = mapped_column(String(32), nullable=True)
     to_number: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    insurer_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    insurer_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
     status: Mapped[str] = mapped_column(String(32), default="in_progress")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     ended_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

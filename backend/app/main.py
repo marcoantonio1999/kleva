@@ -56,14 +56,19 @@ async def twilio_voice_webhook(request: Request) -> PlainTextResponse:
     form = await request.form()
     from_number = str(form.get("From") or "")
     to_number = str(form.get("To") or "")
+    account_sid = str(form.get("AccountSid") or "")
+    insurer = settings.insurer_for_call(to_number=to_number, account_sid=account_sid)
 
     response = VoiceResponse()
-    response.say("Conectando con SeguraNova. Un momento por favor.", language="es-MX", voice="alice")
+    response.say(f"Conectando con {insurer['name']}. Un momento por favor.", language="es-MX", voice="alice")
 
     connect = Connect()
     stream = Stream(url=_build_stream_ws_url(request))
     stream.parameter(name="From", value=from_number)
     stream.parameter(name="To", value=to_number)
+    stream.parameter(name="AccountSid", value=account_sid)
+    stream.parameter(name="InsurerId", value=insurer["id"])
+    stream.parameter(name="InsurerName", value=insurer["name"])
     connect.append(stream)
     response.append(connect)
 
@@ -106,6 +111,8 @@ async def list_calls(limit: int = 20) -> JSONResponse:
             "stream_sid": row.stream_sid,
             "from_number": row.from_number,
             "to_number": row.to_number,
+            "insurer_id": row.insurer_id,
+            "insurer_name": row.insurer_name,
             "status": row.status,
             "created_at": row.created_at.isoformat() if row.created_at else None,
             "ended_at": row.ended_at.isoformat() if row.ended_at else None,
@@ -113,6 +120,28 @@ async def list_calls(limit: int = 20) -> JSONResponse:
         for row in rows
     ]
     return JSONResponse({"items": data})
+
+
+@app.get("/api/insurers")
+async def list_insurers() -> JSONResponse:
+    primary = settings.primary_insurer
+    secondary = settings.secondary_insurer
+    items = [
+        {
+            "id": primary["id"],
+            "name": primary["name"],
+            "phone_number": primary["phone_number"],
+        }
+    ]
+    if secondary["phone_number"]:
+        items.append(
+            {
+                "id": secondary["id"],
+                "name": secondary["name"],
+                "phone_number": secondary["phone_number"],
+            }
+        )
+    return JSONResponse({"items": items})
 
 
 @app.get("/api/interactions/{call_sid}")

@@ -214,7 +214,20 @@ class ToolService:
             return {"ok": False, "error": "No hay call_sid activo para finalizar."}
 
         try:
-            client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
+            creds = settings.twilio_credentials_for_context(
+                account_sid=context.get("account_sid"),
+                to_number=context.get("to_number"),
+            )
+            account_sid = creds.get("account_sid")
+            auth_token = creds.get("auth_token")
+            if not account_sid or not auth_token:
+                return {
+                    "ok": False,
+                    "call_sid": call_sid,
+                    "error": "Credenciales de Twilio no disponibles para esta aseguradora.",
+                }
+
+            client = Client(account_sid, auth_token)
             client.calls(call_sid).update(status="completed")
             return {
                 "ok": True,

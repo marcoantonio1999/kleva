@@ -18,7 +18,7 @@ from app.tools import TOOL_DEFINITIONS, parse_tool_arguments, save_interaction, 
 settings = get_settings()
 
 SYSTEM_PROMPT = """
-Eres un agente de voz para SeguraNova. Habla siempre en espanol claro, calmado, empatico y profesional.
+Eres un agente de voz para la aseguradora configurada en este entorno. Habla siempre en espanol claro, calmado, empatico y profesional.
 Objetivos:
 1) Resolver dudas basicas de seguros usando herramientas.
 2) Registrar ajustes cuando haya incidente no grave.
@@ -52,6 +52,9 @@ class RealtimeCallBridge:
         self.call_sid: str | None = None
         self.from_number: str | None = None
         self.to_number: str | None = None
+        self.account_sid: str | None = None
+        self.insurer_id: str | None = None
+        self.insurer_name: str = settings.app_name
         self._call_closed = False
         self._handled_tool_call_ids: set[str] = set()
 
@@ -114,8 +117,25 @@ class RealtimeCallBridge:
                 start_data = event.get("start", {})
                 self.stream_sid = start_data.get("streamSid")
                 self.call_sid = start_data.get("callSid")
-                self.from_number = start_data.get("customParameters", {}).get("From")
-                self.to_number = start_data.get("customParameters", {}).get("To")
+                custom = start_data.get("customParameters", {})
+                self.from_number = custom.get("From")
+                self.to_number = custom.get("To")
+                self.account_sid = custom.get("AccountSid")
+
+                resolved = settings.insurer_for_call(to_number=self.to_number, account_sid=self.account_sid)
+                self.insurer_id = custom.get("InsurerId") or resolved["id"]
+                self.insurer_name = custom.get("InsurerName") or resolved["name"]
+
+                await openai_ws.send(
+                    json.dumps(
+                        {
+                            "type": "session.update",
+                            "session": {
+                                "instructions": f"{SYSTEM_PROMPT}\n\nContexto de marca activa: Hablas en nombre de {self.insurer_name}.",
+                            },
+                        }
+                    )
+                )
                 await self._upsert_call_session(status="in_progress")
                 await monitor_hub.broadcast(
                     {
@@ -124,6 +144,8 @@ class RealtimeCallBridge:
                         "streamSid": self.stream_sid,
                         "from": self.from_number,
                         "to": self.to_number,
+                        "insurerId": self.insurer_id,
+                        "insurerName": self.insurer_name,
                     }
                 )
 
@@ -195,7 +217,7 @@ class RealtimeCallBridge:
                             "type": "response.create",
                             "response": {
                                 "modalities": ["audio", "text"],
-                                "instructions": "Saluda brevemente en espanol, preséntate como asistente de SeguraNova y pregunta en que puedes ayudar.",
+                                "instructions": f"Saluda brevemente en espanol, presentate como asistente de {self.insurer_name} y pregunta en que puedes ayudar.",
                             },
                         }
                     )
@@ -204,6 +226,8 @@ class RealtimeCallBridge:
                     {
                         "type": "openai_session_ready",
                         "callSid": self.call_sid,
+                        "insurerId": self.insurer_id,
+                        "insurerName": self.insurer_name,
                     }
                 )
 
@@ -231,6 +255,9 @@ class RealtimeCallBridge:
             "call_sid": self.call_sid,
             "from_number": self.from_number,
             "to_number": self.to_number,
+            "account_sid": self.account_sid,
+            "insurer_id": self.insurer_id,
+            "insurer_name": self.insurer_name,
         }
         result = await tool_service.execute(tool_name=tool_name, arguments=arguments, context=context)
 
@@ -240,6 +267,8 @@ class RealtimeCallBridge:
                 "callSid": self.call_sid,
                 "name": tool_name,
                 "result": result,
+                "insurerId": self.insurer_id,
+                "insurerName": self.insurer_name,
             }
         )
 
@@ -264,6 +293,8 @@ class RealtimeCallBridge:
                 "callSid": self.call_sid,
                 "role": role,
                 "text": text,
+                "insurerId": self.insurer_id,
+                "insurerName": self.insurer_name,
             }
         )
 
@@ -272,6 +303,9 @@ class RealtimeCallBridge:
                 "call_sid": self.call_sid,
                 "from_number": self.from_number,
                 "to_number": self.to_number,
+                "account_sid": self.account_sid,
+                "insurer_id": self.insurer_id,
+                "insurer_name": self.insurer_name,
             }
             result = await tool_service.execute(
                 tool_name="end_call_by_ai",
@@ -318,11 +352,15 @@ class RealtimeCallBridge:
                     stream_sid=self.stream_sid,
                     from_number=self.from_number,
                     to_number=self.to_number,
+                    insurer_id=self.insurer_id,
+                    insurer_name=self.insurer_name,
                     status=status,
                 )
                 session.add(row)
             else:
                 existing.stream_sid = self.stream_sid
+                existing.insurer_id = self.insurer_id
+                existing.insurer_name = self.insurer_name
                 existing.status = status
             await session.commit()
 
@@ -345,5 +383,7 @@ class RealtimeCallBridge:
             {
                 "type": "call_ended",
                 "callSid": self.call_sid,
+                "insurerId": self.insurer_id,
+                "insurerName": self.insurer_name,
             }
         )
